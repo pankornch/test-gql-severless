@@ -6,15 +6,18 @@ service: apollo-lambda
 provider:
   name: aws
   runtime: nodejs14.x
+  region: ap-southeast-1
 functions:
   graphql:
     handler: index.graphqlHandler
     events:
     - http:
-        path: /
+        path: /graphql
         method: post
         cors: true
     - http:
         path: /
         method: get
         cors: true
+plugins:
+  - serverless-offline
