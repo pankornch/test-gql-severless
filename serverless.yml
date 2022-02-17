@@ -1,12 +1,22 @@
 org: pankornch
 app: apollo-lambda
-# serverless.yml
 
 service: apollo-lambda
 provider:
   name: aws
   runtime: nodejs14.x
   region: ap-southeast-1
+  iamRoleStatements:
+    - Effect: "Allow"
+      Action:
+       - dynamodb:Query
+       - dynamodb:Scan
+       - dynamodb:GetItem
+       - dynamodb:PutItem
+       - dynamodb:UpdateItem
+       - dynamodb:DeleteItem
+      Resource:
+        - { "Fn::GetAtt": ["TodoTable", "Arn"] }
 functions:
   graphql:
     handler: index.graphqlHandler
@@ -20,4 +30,23 @@ functions:
         method: get
         cors: true
 plugins:
+  - serverless-plugin-typescript
   - serverless-offline
+custom:
+  serverless-offline:
+    useChildProcesses: true
+resources:
+  Resources:
+    TodoTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: TodoTable
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
